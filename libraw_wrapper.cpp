@@ -40,16 +40,6 @@ public:
         if (ret != LIBRAW_SUCCESS) {
             throw std::runtime_error("LibRaw: open_buffer() failed with code " + std::to_string(ret));
         }
-
-        ret = processor_->unpack();
-        if (ret != LIBRAW_SUCCESS) {
-            throw std::runtime_error("LibRaw: unpack() failed with code " + std::to_string(ret));
-        }
-
-        ret = processor_->dcraw_process();
-        if (ret != LIBRAW_SUCCESS) {
-            throw std::runtime_error("LibRaw: dcraw_process() failed with code " + std::to_string(ret));
-        }
     }
 
     val metadata(bool fullOutput=false) {
@@ -879,6 +869,19 @@ public:
         if (!processor_) {
             return val::undefined();
         }
+		if(!isUnpacked) {
+			isUnpacked = true;
+
+			int ret = processor_->unpack();
+			if (ret != LIBRAW_SUCCESS) {
+				throw std::runtime_error("LibRaw: unpack() failed with code " + std::to_string(ret));
+			}
+
+			ret = processor_->dcraw_process();
+			if (ret != LIBRAW_SUCCESS) {
+				throw std::runtime_error("LibRaw: dcraw_process() failed with code " + std::to_string(ret));
+			}
+		}
 
         libraw_processed_image_t* out = processor_->dcraw_make_mem_image();
         // If out is NULL, we can't proceed
@@ -916,6 +919,7 @@ public:
 
 private:
     LibRaw* processor_ = nullptr;
+	bool isUnpacked = false;
 
     void applySettings(const val& settings) {
         // If 'settings' is null or undefined, just skip
