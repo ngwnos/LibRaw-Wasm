@@ -29,6 +29,9 @@ export default class LibRaw {
 	if(metadata?.hasOwnProperty('thumb_format')) {
 		metadata.thumb_format = ['unknown', 'jpeg', 'bitmap', 'bitmap16', 'layer', 'rollei', 'h265'][metadata.thumb_format] || 'unknown';
 	}
+	if(metadata?.hasOwnProperty('desc')) {
+		metadata.desc = String(metadata.desc).trim();
+	}
 	return metadata;
   }
 
