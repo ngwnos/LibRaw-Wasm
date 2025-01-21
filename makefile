@@ -6,6 +6,7 @@ all:
 		-s USE_ZLIB=1 \
 		-s MODULARIZE=1 \
 		-s EXPORT_ES6=1 \
+		-s DISABLE_EXCEPTION_CATCHING=0 \
 		-s ALLOW_MEMORY_GROWTH=1 \
 		-s ENVIRONMENT="web" \
 		-O3 \
