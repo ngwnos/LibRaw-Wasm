@@ -33,15 +33,15 @@
         await raw.open(new Uint8Array(arrayBuffer), { user_flip: 0 });
 
         // Fetch metadata
-        const meta = await raw.metadata();
+        const meta = await raw.metadata(true);
         console.log('Metadata:', meta);
 		output.innerText = JSON.stringify(meta, null, 4);
-
+/*
         // Fetch the decoded image data (RGB pixels)
         const imageData = await raw.imageData();
         console.log('Image data:', imageData);
         console.log('Image data length:', imageData.length);
-
+*/
         // If you want to interpret the data as a PPM (for example),
         // you could do something like convert to a text-based PPM or
         // place it in a <canvas>. For now, we just log it.
