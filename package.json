@@ -1,0 +1,16 @@
+{
+  "name": "libraw-wasm",
+  "version": "1.0.0",
+  "description": "LibRaw WASM bindings to be able to use it in the browser.",
+  "main": "index.js",
+  "type": "module",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "example": "python -m http.server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ybouane",
+  "license": "ISC"
+}

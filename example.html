@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>LibRaw Demo</title>
+</head>
+<body>
+  <h1>LibRaw WASM Demo</h1>
+
+  <input type="file" id="file" accept=".cr2,.nef,.arw,.dng,.raw,.rw2" />
+  <p>Select a RAW file above. Then open the browser console to see logs.</p>
+  <pre id="output"></pre>
+
+  <script type="module">
+    import LibRaw from './index.js';
+
+    const fileInput = document.getElementById('file');
+    const output = document.getElementById('output');
+    // Listen for file selection
+    fileInput.addEventListener('change', async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      try {
+        // Read the RAW file into an ArrayBuffer
+        const arrayBuffer = await file.arrayBuffer();
+		console.log(arrayBuffer);
+
+        // Instantiate LibRaw
+        const raw = new LibRaw();
+
+        // Open (decode) the RAW file
+        await raw.open(new Uint8Array(arrayBuffer), { user_flip: 0 });
+
+        // Fetch metadata
+        const meta = await raw.metadata();
+        console.log('Metadata:', meta);
+		output.innerText = JSON.stringify(meta, null, 4);
+
+        // Fetch the decoded image data (RGB pixels)
+        const imageData = await raw.imageData();
+        console.log('Image data:', imageData);
+        console.log('Image data length:', imageData.length);
+
+        // If you want to interpret the data as a PPM (for example),
+        // you could do something like convert to a text-based PPM or
+        // place it in a <canvas>. For now, we just log it.
+      } catch (err) {
+        console.error('Error processing RAW:', err);
+      }
+    });
+  </script>
+</body>
+</html>
