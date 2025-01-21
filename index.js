@@ -25,7 +25,11 @@ export default class LibRaw {
 
   async metadata() {
     await this._ready;
-    return this._libraw.metadata();
+    let metadata = this._libraw.metadata();
+	if(metadata?.hasOwnProperty('thumb_format')) {
+		metadata.thumb_format = ['unknown', 'jpeg', 'bitmap', 'bitmap16', 'layer', 'rollei', 'h265'][metadata.thumb_format] || 'unknown';
+	}
+	return metadata;
   }
 
   async imageData() {

@@ -84,7 +84,7 @@ public:
         // Thumbnail info
         meta.set("thumb_width",  processor_->imgdata.thumbnail.twidth);
         meta.set("thumb_height", processor_->imgdata.thumbnail.theight);
-        meta.set("thumb_format", processor_->imgdata.thumbnail.tformat);
+        meta.set("thumb_format", static_cast<int>(processor_->imgdata.thumbnail.tformat));
 
         return meta;
     }
