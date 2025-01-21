@@ -966,8 +966,8 @@ private:
                 }
             }
         }
-        if (settings.hasOwnProperty("user_mul")) {
-            val arr = settings["user_mul"];
+        if (settings.hasOwnProperty("userMul")) {
+            val arr = settings["userMul"];
             if (arr["length"].as<unsigned>() == 4) {
                 for (int i = 0; i < 4; i++) {
                     params.user_mul[i] = arr[i].as<float>();
@@ -982,113 +982,113 @@ private:
         if (settings.hasOwnProperty("threshold")) {
             params.threshold = settings["threshold"].as<float>();
         }
-        if (settings.hasOwnProperty("auto_bright_thr")) {
-            params.auto_bright_thr = settings["auto_bright_thr"].as<float>();
+        if (settings.hasOwnProperty("autoBrightThr")) {
+            params.auto_bright_thr = settings["autoBrightThr"].as<float>();
         }
-        if (settings.hasOwnProperty("adjust_maximum_thr")) {
-            params.adjust_maximum_thr = settings["adjust_maximum_thr"].as<float>();
+        if (settings.hasOwnProperty("adjustMaximumThr")) {
+            params.adjust_maximum_thr = settings["adjustMaximumThr"].as<float>();
         }
-        if (settings.hasOwnProperty("exp_shift")) {
-            params.exp_shift = settings["exp_shift"].as<float>();
+        if (settings.hasOwnProperty("expShift")) {
+            params.exp_shift = settings["expShift"].as<float>();
         }
-        if (settings.hasOwnProperty("exp_preser")) {
-            params.exp_preser = settings["exp_preser"].as<float>();
+        if (settings.hasOwnProperty("expPreser")) {
+            params.exp_preser = settings["expPreser"].as<float>();
         }
 
         // -- INTEGERS --
-        if (settings.hasOwnProperty("half_size")) {
-            params.half_size = settings["half_size"].as<int>();
+        if (settings.hasOwnProperty("halfSize")) {
+            params.half_size = settings["halfSize"].as<int>();
         }
-        if (settings.hasOwnProperty("four_color_rgb")) {
-            params.four_color_rgb = settings["four_color_rgb"].as<int>();
+        if (settings.hasOwnProperty("fourColorRgb")) {
+            params.four_color_rgb = settings["fourColorRgb"].as<int>();
         }
         if (settings.hasOwnProperty("highlight")) {
             params.highlight = settings["highlight"].as<int>();
         }
-        if (settings.hasOwnProperty("use_auto_wb")) {
-            params.use_auto_wb = settings["use_auto_wb"].as<int>();
+        if (settings.hasOwnProperty("useAutoWb")) {
+            params.use_auto_wb = settings["useAutoWb"].as<int>();
         }
-        if (settings.hasOwnProperty("use_camera_wb")) {
-            params.use_camera_wb = settings["use_camera_wb"].as<int>();
+        if (settings.hasOwnProperty("useCameraWb")) {
+            params.use_camera_wb = settings["useCameraWb"].as<int>();
         }
-        if (settings.hasOwnProperty("use_camera_matrix")) {
-            params.use_camera_matrix = settings["use_camera_matrix"].as<int>();
+        if (settings.hasOwnProperty("useCameraMatrix")) {
+            params.use_camera_matrix = settings["useCameraMatrix"].as<int>();
         }
-        if (settings.hasOwnProperty("output_color")) {
-            params.output_color = settings["output_color"].as<int>();
+        if (settings.hasOwnProperty("outputColor")) {
+            params.output_color = settings["outputColor"].as<int>();
         }
-        if (settings.hasOwnProperty("output_bps")) {
-            params.output_bps = settings["output_bps"].as<int>();
+        if (settings.hasOwnProperty("outputBps")) {
+            params.output_bps = settings["outputBps"].as<int>();
         }
-        if (settings.hasOwnProperty("output_tiff")) {
-            params.output_tiff = settings["output_tiff"].as<int>();
+        if (settings.hasOwnProperty("outputTiff")) {
+            params.output_tiff = settings["outputTiff"].as<int>();
         }
-        if (settings.hasOwnProperty("output_flags")) {
-            params.output_flags = settings["output_flags"].as<int>();
+        if (settings.hasOwnProperty("outputFlags")) {
+            params.output_flags = settings["outputFlags"].as<int>();
         }
-        if (settings.hasOwnProperty("user_flip")) {
-            params.user_flip = settings["user_flip"].as<int>();
+        if (settings.hasOwnProperty("userFlip")) {
+            params.user_flip = settings["userFlip"].as<int>();
         }
-        if (settings.hasOwnProperty("user_qual")) {
-            params.user_qual = settings["user_qual"].as<int>();
+        if (settings.hasOwnProperty("userQual")) {
+            params.user_qual = settings["userQual"].as<int>();
         }
-        if (settings.hasOwnProperty("user_black")) {
-            params.user_black = settings["user_black"].as<int>();
+        if (settings.hasOwnProperty("userBlack")) {
+            params.user_black = settings["userBlack"].as<int>();
         }
-        if (settings.hasOwnProperty("user_cblack")) {
-            val arr = settings["user_cblack"];
+        if (settings.hasOwnProperty("userCblack")) {
+            val arr = settings["userCblack"];
             if (arr["length"].as<unsigned>() == 4) {
                 for (int i = 0; i < 4; i++) {
                     params.user_cblack[i] = arr[i].as<int>();
                 }
             }
         }
-        if (settings.hasOwnProperty("user_sat")) {
-            params.user_sat = settings["user_sat"].as<int>();
+        if (settings.hasOwnProperty("userSat")) {
+            params.user_sat = settings["userSat"].as<int>();
         }
-        if (settings.hasOwnProperty("med_passes")) {
-            params.med_passes = settings["med_passes"].as<int>();
+        if (settings.hasOwnProperty("medPasses")) {
+            params.med_passes = settings["medPasses"].as<int>();
         }
-        if (settings.hasOwnProperty("no_auto_bright")) {
-            params.no_auto_bright = settings["no_auto_bright"].as<int>();
+        if (settings.hasOwnProperty("noAutoBright")) {
+            params.no_auto_bright = settings["noAutoBright"].as<int>();
         }
-        if (settings.hasOwnProperty("use_fuji_rotate")) {
-            params.use_fuji_rotate = settings["use_fuji_rotate"].as<int>();
+        if (settings.hasOwnProperty("useFujiRotate")) {
+            params.use_fuji_rotate = settings["useFujiRotate"].as<int>();
         }
-        if (settings.hasOwnProperty("green_matching")) {
-            params.green_matching = settings["green_matching"].as<int>();
+        if (settings.hasOwnProperty("greenMatching")) {
+            params.green_matching = settings["greenMatching"].as<int>();
         }
-        if (settings.hasOwnProperty("dcb_iterations")) {
-            params.dcb_iterations = settings["dcb_iterations"].as<int>();
+        if (settings.hasOwnProperty("dcbIterations")) {
+            params.dcb_iterations = settings["dcbIterations"].as<int>();
         }
-        if (settings.hasOwnProperty("dcb_enhance_fl")) {
-            params.dcb_enhance_fl = settings["dcb_enhance_fl"].as<int>();
+        if (settings.hasOwnProperty("dcbEnhanceFl")) {
+            params.dcb_enhance_fl = settings["dcbEnhanceFl"].as<int>();
         }
-        if (settings.hasOwnProperty("fbdd_noiserd")) {
-            params.fbdd_noiserd = settings["fbdd_noiserd"].as<int>();
+        if (settings.hasOwnProperty("fbddNoiserd")) {
+            params.fbdd_noiserd = settings["fbddNoiserd"].as<int>();
         }
-        if (settings.hasOwnProperty("exp_correc")) {
-            params.exp_correc = settings["exp_correc"].as<int>();
+        if (settings.hasOwnProperty("expCorrec")) {
+            params.exp_correc = settings["expCorrec"].as<int>();
         }
-        if (settings.hasOwnProperty("no_auto_scale")) {
-            params.no_auto_scale = settings["no_auto_scale"].as<int>();
+        if (settings.hasOwnProperty("noAutoScale")) {
+            params.no_auto_scale = settings["noAutoScale"].as<int>();
         }
-        if (settings.hasOwnProperty("no_interpolation")) {
-            params.no_interpolation = settings["no_interpolation"].as<int>();
+        if (settings.hasOwnProperty("noInterpolation")) {
+            params.no_interpolation = settings["noInterpolation"].as<int>();
         }
 
         // -- STRINGS (C-strings) --
-        if (settings.hasOwnProperty("output_profile")) {
-            setStringMember(params.output_profile, settings["output_profile"].as<std::string>());
+        if (settings.hasOwnProperty("outputProfile")) {
+            setStringMember(params.output_profile, settings["outputProfile"].as<std::string>());
         }
-        if (settings.hasOwnProperty("camera_profile")) {
-            setStringMember(params.camera_profile, settings["camera_profile"].as<std::string>());
+        if (settings.hasOwnProperty("cameraProfile")) {
+            setStringMember(params.camera_profile, settings["cameraProfile"].as<std::string>());
         }
-        if (settings.hasOwnProperty("bad_pixels")) {
-            setStringMember(params.bad_pixels, settings["bad_pixels"].as<std::string>());
+        if (settings.hasOwnProperty("badPixels")) {
+            setStringMember(params.bad_pixels, settings["badPixels"].as<std::string>());
         }
-        if (settings.hasOwnProperty("dark_frame")) {
-            setStringMember(params.dark_frame, settings["dark_frame"].as<std::string>());
+        if (settings.hasOwnProperty("darkFrame")) {
+            setStringMember(params.dark_frame, settings["darkFrame"].as<std::string>());
         }
     }
 	// Convert a JS Uint8Array to a std::vector<uint8_t>
