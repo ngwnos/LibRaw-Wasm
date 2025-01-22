@@ -934,7 +934,7 @@ private:
 		libraw_output_params_t &params = processor_->imgdata.params;
 
 		// -- ARRAYS --
-		if (settings.hasOwnProperty("greybox")) {
+		if (settings.hasOwnProperty("greybox") && !settings["greybox"].isNull() && !settings["greybox"].isUndefined()) {
 			val arr = settings["greybox"];
 			if (arr["length"].as<unsigned>() == 4) {
 				for (int i = 0; i < 4; i++) {
@@ -942,7 +942,7 @@ private:
 				}
 			}
 		}
-		if (settings.hasOwnProperty("cropbox")) {
+		if (settings.hasOwnProperty("cropbox") && !settings["cropbox"].isNull() && !settings["cropbox"].isUndefined()) {
 			val arr = settings["cropbox"];
 			if (arr["length"].as<unsigned>() == 4) {
 				for (int i = 0; i < 4; i++) {
@@ -950,7 +950,7 @@ private:
 				}
 			}
 		}
-		if (settings.hasOwnProperty("aber")) {
+		if (settings.hasOwnProperty("aber") && !settings["aber"].isNull() && !settings["aber"].isUndefined()) {
 			val arr = settings["aber"];
 			if (arr["length"].as<unsigned>() == 4) {
 				for (int i = 0; i < 4; i++) {
@@ -958,7 +958,7 @@ private:
 				}
 			}
 		}
-		if (settings.hasOwnProperty("gamm")) {
+		if (settings.hasOwnProperty("gamm") && !settings["gamm"].isNull() && !settings["gamm"].isUndefined()) {
 			val arr = settings["gamm"];
 			if (arr["length"].as<unsigned>() == 6) {
 				for (int i = 0; i < 6; i++) {
@@ -966,7 +966,7 @@ private:
 				}
 			}
 		}
-		if (settings.hasOwnProperty("userMul")) {
+		if (settings.hasOwnProperty("userMul") && !settings["userMul"].isNull() && !settings["userMul"].isUndefined()) {
 			val arr = settings["userMul"];
 			if (arr["length"].as<unsigned>() == 4) {
 				for (int i = 0; i < 4; i++) {
