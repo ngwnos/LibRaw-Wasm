@@ -1,6 +1,15 @@
+# LibRaw-Wasm
+A WebAssembly build of LibRaw, powered by Emscripten. This lets you decode and process RAW image files directly in the browser or in a Node.js environment supporting WebAssembly. With LibRaw-Wasm, you can extract metadata and obtain decoded image data from formats such as CR2, NEF, ARW, DNG, and more.
+
+This package provides an API for opening RAW images and processing them using the same robust codebase behind LibRaw.
 
 
-# How to use
+# Install
+```bash
+npm install libraw-wasm
+```
+
+# Basic usage
 ```javascript
 import LibRaw from 'libraw-wasm';
 
@@ -70,3 +79,9 @@ console.log('Image data length:', imageData.length);
 	darkFrame: null,		// -K <file> : file with dark frame (16-bit PGM)
 }
 ```
+
+
+# Additional Notes
+- **Performance:** Decoding large RAW files in the browser can be CPU-intensive. Consider running this in a Web Worker if performance or UI responsiveness is a concern.
+- **Web Workers:** Although not implemented yet into this package yet, it would be advisable to run the RAW file decoding in a Web Worker to avoid blocking the main thread.
+- **Memory:** WebAssembly modules can allocate a significant amount of memory. Check your environment’s limits if you work with very large files.
