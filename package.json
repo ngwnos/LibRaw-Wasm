@@ -8,8 +8,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "example": "python -m http.server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "example": "python -m http.server"
   },
   "author": "ybouane",
   "license": "ISC"
