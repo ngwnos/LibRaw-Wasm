@@ -14,70 +14,70 @@ using namespace emscripten;
 
 class WASMLibRaw {
 public:
-    WASMLibRaw() {
-        processor_ = new LibRaw();
-    }
+	WASMLibRaw() {
+		processor_ = new LibRaw();
+	}
 
-    ~WASMLibRaw() {
-        if (processor_) {
-            cleanupParamsStrings();
-            delete processor_;
-            processor_ = nullptr;
-        }
-    }
+	~WASMLibRaw() {
+		if (processor_) {
+			cleanupParamsStrings();
+			delete processor_;
+			processor_ = nullptr;
+		}
+	}
 
-    void open(val jsBuffer, val settings) {
-        if (!processor_) {
-            throw std::runtime_error("LibRaw not initialized");
-        }
+	void open(val jsBuffer, val settings) {
+		if (!processor_) {
+			throw std::runtime_error("LibRaw not initialized");
+		}
 
 		// 1) Convert the JS buffer (Uint8Array) to a C++ std::vector<uint8_t>.
-        std::vector<uint8_t> buffer = toNativeVector(jsBuffer);
+		std::vector<uint8_t> buffer = toNativeVector(jsBuffer);
 
-        applySettings(settings);
+		applySettings(settings);
 
-        int ret = processor_->open_buffer((void*)buffer.data(), buffer.size());
-        if (ret != LIBRAW_SUCCESS) {
-            throw std::runtime_error("LibRaw: open_buffer() failed with code " + std::to_string(ret));
-        }
-    }
+		int ret = processor_->open_buffer((void*)buffer.data(), buffer.size());
+		if (ret != LIBRAW_SUCCESS) {
+			throw std::runtime_error("LibRaw: open_buffer() failed with code " + std::to_string(ret));
+		}
+	}
 
-    val metadata(bool fullOutput=false) {
-        if (!processor_) {
-            return val::undefined();
-        }
+	val metadata(bool fullOutput=false) {
+		if (!processor_) {
+			return val::undefined();
+		}
 
-        val meta = val::object();
-        // --------------------------------------------------------------------
-        // 1) Basic fields: sizes, camera info, etc.
-        // --------------------------------------------------------------------
-        meta.set("width",       processor_->imgdata.sizes.width);
-        meta.set("height",      processor_->imgdata.sizes.height);
-        meta.set("raw_width",   processor_->imgdata.sizes.raw_width);
-        meta.set("raw_height",  processor_->imgdata.sizes.raw_height);
-        meta.set("top_margin",  processor_->imgdata.sizes.top_margin);
-        meta.set("left_margin", processor_->imgdata.sizes.left_margin);
+		val meta = val::object();
+		// --------------------------------------------------------------------
+		// 1) Basic fields: sizes, camera info, etc.
+		// --------------------------------------------------------------------
+		meta.set("width",	   processor_->imgdata.sizes.width);
+		meta.set("height",	  processor_->imgdata.sizes.height);
+		meta.set("raw_width",   processor_->imgdata.sizes.raw_width);
+		meta.set("raw_height",  processor_->imgdata.sizes.raw_height);
+		meta.set("top_margin",  processor_->imgdata.sizes.top_margin);
+		meta.set("left_margin", processor_->imgdata.sizes.left_margin);
 
-        // Basic camera info
-        meta.set("camera_make",  std::string(processor_->imgdata.idata.make));
-        meta.set("camera_model", std::string(processor_->imgdata.idata.model));
+		// Basic camera info
+		meta.set("camera_make",  std::string(processor_->imgdata.idata.make));
+		meta.set("camera_model", std::string(processor_->imgdata.idata.model));
 
-        // EXIF-like data
-        meta.set("iso_speed",  processor_->imgdata.other.iso_speed);
-        meta.set("shutter",    processor_->imgdata.other.shutter);
-        meta.set("aperture",   processor_->imgdata.other.aperture);
-        meta.set("focal_len",  processor_->imgdata.other.focal_len);
-        meta.set("timestamp",  double(processor_->imgdata.other.timestamp));
-        meta.set("shot_order", processor_->imgdata.other.shot_order);
-        meta.set("desc",       std::string(processor_->imgdata.other.desc));
-        meta.set("artist",     std::string(processor_->imgdata.other.artist));
+		// EXIF-like data
+		meta.set("iso_speed",  processor_->imgdata.other.iso_speed);
+		meta.set("shutter",	processor_->imgdata.other.shutter);
+		meta.set("aperture",   processor_->imgdata.other.aperture);
+		meta.set("focal_len",  processor_->imgdata.other.focal_len);
+		meta.set("timestamp",  double(processor_->imgdata.other.timestamp));
+		meta.set("shot_order", processor_->imgdata.other.shot_order);
+		meta.set("desc",	   std::string(processor_->imgdata.other.desc));
+		meta.set("artist",	 std::string(processor_->imgdata.other.artist));
 
-        // Thumbnail info
-        meta.set("thumb_width",  processor_->imgdata.thumbnail.twidth);
-        meta.set("thumb_height", processor_->imgdata.thumbnail.theight);
-        // Cast enum to int so we don't need to register it
-        meta.set("thumb_format",
-                 static_cast<int>(processor_->imgdata.thumbnail.tformat));
+		// Thumbnail info
+		meta.set("thumb_width",  processor_->imgdata.thumbnail.twidth);
+		meta.set("thumb_height", processor_->imgdata.thumbnail.theight);
+		// Cast enum to int so we don't need to register it
+		meta.set("thumb_format",
+				 static_cast<int>(processor_->imgdata.thumbnail.tformat));
 
 		if(fullOutput) {
 			// --------------------------------------------------------------------
@@ -86,11 +86,11 @@ public:
 			const libraw_colordata_t &c = processor_->imgdata.color;
 			val colorData = val::object();
 			
-			colorData.set("black",         c.black);
+			colorData.set("black",		 c.black);
 			colorData.set("data_maximum",  c.data_maximum);
-			colorData.set("maximum",       c.maximum);
-			colorData.set("fmaximum",      c.fmaximum);
-			colorData.set("fnorm",         c.fnorm);
+			colorData.set("maximum",	   c.maximum);
+			colorData.set("fmaximum",	  c.fmaximum);
+			colorData.set("fnorm",		 c.fnorm);
 
 			{
 				val camMulArr = val::array();
@@ -109,14 +109,14 @@ public:
 
 			// c.rgb_cam[3][4], c.cam_xyz[4][3], etc. can also be copied if needed.
 			colorData.set("flash_used",   c.flash_used);
-			colorData.set("canon_ev",     c.canon_ev);
-			colorData.set("model2",       std::string(c.model2));
+			colorData.set("canon_ev",	 c.canon_ev);
+			colorData.set("model2",	   std::string(c.model2));
 			colorData.set("UniqueCameraModel", std::string(c.UniqueCameraModel));
 			colorData.set("LocalizedCameraModel",
 						std::string(c.LocalizedCameraModel));
-			colorData.set("ImageUniqueID",      std::string(c.ImageUniqueID));
-			colorData.set("RawDataUniqueID",    std::string(c.RawDataUniqueID));
-			colorData.set("raw_bps",     (int)c.raw_bps);
+			colorData.set("ImageUniqueID",	  std::string(c.ImageUniqueID));
+			colorData.set("RawDataUniqueID",	std::string(c.RawDataUniqueID));
+			colorData.set("raw_bps",	 (int)c.raw_bps);
 			colorData.set("ExifColorSpace", c.ExifColorSpace);
 			// dng_color, dng_levels, etc. also here if needed
 
@@ -128,19 +128,19 @@ public:
 			const libraw_metadata_common_t &mcom = processor_->imgdata.makernotes.common;
 			val metaCommon = val::object();
 
-			metaCommon.set("FlashEC",                mcom.FlashEC);
-			metaCommon.set("FlashGN",                mcom.FlashGN);
-			metaCommon.set("CameraTemperature",      mcom.CameraTemperature);
-			metaCommon.set("SensorTemperature",      mcom.SensorTemperature);
-			metaCommon.set("SensorTemperature2",     mcom.SensorTemperature2);
-			metaCommon.set("LensTemperature",        mcom.LensTemperature);
-			metaCommon.set("AmbientTemperature",     mcom.AmbientTemperature);
-			metaCommon.set("BatteryTemperature",     mcom.BatteryTemperature);
+			metaCommon.set("FlashEC",				mcom.FlashEC);
+			metaCommon.set("FlashGN",				mcom.FlashGN);
+			metaCommon.set("CameraTemperature",	  mcom.CameraTemperature);
+			metaCommon.set("SensorTemperature",	  mcom.SensorTemperature);
+			metaCommon.set("SensorTemperature2",	 mcom.SensorTemperature2);
+			metaCommon.set("LensTemperature",		mcom.LensTemperature);
+			metaCommon.set("AmbientTemperature",	 mcom.AmbientTemperature);
+			metaCommon.set("BatteryTemperature",	 mcom.BatteryTemperature);
 			metaCommon.set("exifAmbientTemperature", mcom.exifAmbientTemperature);
-			metaCommon.set("exifHumidity",           mcom.exifHumidity);
-			metaCommon.set("exifPressure",           mcom.exifPressure);
-			metaCommon.set("exifWaterDepth",         mcom.exifWaterDepth);
-			metaCommon.set("exifAcceleration",       mcom.exifAcceleration);
+			metaCommon.set("exifHumidity",		   mcom.exifHumidity);
+			metaCommon.set("exifPressure",		   mcom.exifPressure);
+			metaCommon.set("exifWaterDepth",		 mcom.exifWaterDepth);
+			metaCommon.set("exifAcceleration",	   mcom.exifAcceleration);
 			metaCommon.set("exifCameraElevationAngle", mcom.exifCameraElevationAngle);
 			metaCommon.set("real_ISO", mcom.real_ISO);
 			metaCommon.set("exifExposureIndex", mcom.exifExposureIndex);
@@ -154,7 +154,7 @@ public:
 				for (int i = 0; i < mcom.afcount; i++) {
 					val afItem = val::object();
 					const libraw_afinfo_item_t &afdata = mcom.afdata[i];
-					afItem.set("AFInfoData_tag",     afdata.AFInfoData_tag);
+					afItem.set("AFInfoData_tag",	 afdata.AFInfoData_tag);
 					afItem.set("AFInfoData_order",   afdata.AFInfoData_order);
 					afItem.set("AFInfoData_version", afdata.AFInfoData_version);
 					afItem.set("AFInfoData_length",  afdata.AFInfoData_length);
@@ -169,8 +169,8 @@ public:
 
 			// --------------------------------------------------------------------
 			// 4) MakerNotes for the brand (conditional)
-			//    We store them in a property named after the brand, e.g. `canon`,
-			//    `nikon`, `sony`, etc.
+			//	We store them in a property named after the brand, e.g. `canon`,
+			//	`nikon`, `sony`, etc.
 			// --------------------------------------------------------------------
 			std::string makeStr(processor_->imgdata.idata.make);
 			std::string makeLower = makeStr;
@@ -183,10 +183,10 @@ public:
 				const libraw_canon_makernotes_t &cCanon =
 					processor_->imgdata.makernotes.canon;
 
-				canonObj.set("ColorDataVer",        cCanon.ColorDataVer);
-				canonObj.set("ColorDataSubVer",     cCanon.ColorDataSubVer);
+				canonObj.set("ColorDataVer",		cCanon.ColorDataVer);
+				canonObj.set("ColorDataSubVer",	 cCanon.ColorDataSubVer);
 				canonObj.set("SpecularWhiteLevel",  cCanon.SpecularWhiteLevel);
-				canonObj.set("NormalWhiteLevel",    cCanon.NormalWhiteLevel);
+				canonObj.set("NormalWhiteLevel",	cCanon.NormalWhiteLevel);
 
 				{
 					val arr = val::array();
@@ -205,33 +205,33 @@ public:
 					canonObj.set("multishot", arr);
 				}
 
-				canonObj.set("MeteringMode",          cCanon.MeteringMode);
-				canonObj.set("SpotMeteringMode",      cCanon.SpotMeteringMode);
-				canonObj.set("FlashMeteringMode",     (int)cCanon.FlashMeteringMode);
-				canonObj.set("FlashExposureLock",     cCanon.FlashExposureLock);
-				canonObj.set("ExposureMode",          cCanon.ExposureMode);
-				canonObj.set("AESetting",             cCanon.AESetting);
-				canonObj.set("ImageStabilization",    cCanon.ImageStabilization);
-				canonObj.set("FlashMode",             cCanon.FlashMode);
-				canonObj.set("FlashActivity",         cCanon.FlashActivity);
-				canonObj.set("FlashBits",             cCanon.FlashBits);
-				canonObj.set("ManualFlashOutput",     cCanon.ManualFlashOutput);
-				canonObj.set("FlashOutput",           cCanon.FlashOutput);
-				canonObj.set("FlashGuideNumber",      cCanon.FlashGuideNumber);
-				canonObj.set("ContinuousDrive",       cCanon.ContinuousDrive);
-				canonObj.set("SensorWidth",           cCanon.SensorWidth);
-				canonObj.set("SensorHeight",          cCanon.SensorHeight);
-				canonObj.set("AFMicroAdjMode",        cCanon.AFMicroAdjMode);
-				canonObj.set("AFMicroAdjValue",       cCanon.AFMicroAdjValue);
-				canonObj.set("MakernotesFlip",        cCanon.MakernotesFlip);
-				canonObj.set("RecordMode",            cCanon.RecordMode);
-				canonObj.set("SRAWQuality",           cCanon.SRAWQuality);
-				canonObj.set("wbi",                   (unsigned)cCanon.wbi);
-				canonObj.set("RF_lensID",             cCanon.RF_lensID);
+				canonObj.set("MeteringMode",		  cCanon.MeteringMode);
+				canonObj.set("SpotMeteringMode",	  cCanon.SpotMeteringMode);
+				canonObj.set("FlashMeteringMode",	 (int)cCanon.FlashMeteringMode);
+				canonObj.set("FlashExposureLock",	 cCanon.FlashExposureLock);
+				canonObj.set("ExposureMode",		  cCanon.ExposureMode);
+				canonObj.set("AESetting",			 cCanon.AESetting);
+				canonObj.set("ImageStabilization",	cCanon.ImageStabilization);
+				canonObj.set("FlashMode",			 cCanon.FlashMode);
+				canonObj.set("FlashActivity",		 cCanon.FlashActivity);
+				canonObj.set("FlashBits",			 cCanon.FlashBits);
+				canonObj.set("ManualFlashOutput",	 cCanon.ManualFlashOutput);
+				canonObj.set("FlashOutput",		   cCanon.FlashOutput);
+				canonObj.set("FlashGuideNumber",	  cCanon.FlashGuideNumber);
+				canonObj.set("ContinuousDrive",	   cCanon.ContinuousDrive);
+				canonObj.set("SensorWidth",		   cCanon.SensorWidth);
+				canonObj.set("SensorHeight",		  cCanon.SensorHeight);
+				canonObj.set("AFMicroAdjMode",		cCanon.AFMicroAdjMode);
+				canonObj.set("AFMicroAdjValue",	   cCanon.AFMicroAdjValue);
+				canonObj.set("MakernotesFlip",		cCanon.MakernotesFlip);
+				canonObj.set("RecordMode",			cCanon.RecordMode);
+				canonObj.set("SRAWQuality",		   cCanon.SRAWQuality);
+				canonObj.set("wbi",				   (unsigned)cCanon.wbi);
+				canonObj.set("RF_lensID",			 cCanon.RF_lensID);
 				canonObj.set("AutoLightingOptimizer", cCanon.AutoLightingOptimizer);
 				canonObj.set("HighlightTonePriority", cCanon.HighlightTonePriority);
-				canonObj.set("Quality",               cCanon.Quality);
-				canonObj.set("CanonLog",              cCanon.CanonLog);
+				canonObj.set("Quality",			   cCanon.Quality);
+				canonObj.set("CanonLog",			  cCanon.CanonLog);
 
 				
 				{
@@ -252,8 +252,8 @@ public:
 					processor_->imgdata.makernotes.nikon;
 
 				nikonObj.set("ExposureBracketValue", cNikon.ExposureBracketValue);
-				nikonObj.set("ActiveDLighting",      cNikon.ActiveDLighting);
-				nikonObj.set("ShootingMode",         (int)cNikon.ShootingMode);
+				nikonObj.set("ActiveDLighting",	  cNikon.ActiveDLighting);
+				nikonObj.set("ShootingMode",		 (int)cNikon.ShootingMode);
 
 				{
 					val arr = val::array();
@@ -264,8 +264,8 @@ public:
 				}
 
 				nikonObj.set("VibrationReduction",   (int)cNikon.VibrationReduction);
-				nikonObj.set("FlashSetting",         std::string(cNikon.FlashSetting));
-				nikonObj.set("FlashType",           std::string(cNikon.FlashType));
+				nikonObj.set("FlashSetting",		 std::string(cNikon.FlashSetting));
+				nikonObj.set("FlashType",		   std::string(cNikon.FlashType));
 
 				{
 					val arr = val::array();
@@ -292,21 +292,21 @@ public:
 				nikonObj.set("FlashExposureBracketValue3",
 							cNikon.FlashExposureBracketValue[3]);
 
-				nikonObj.set("FlashMode",                (int)cNikon.FlashMode);
+				nikonObj.set("FlashMode",				(int)cNikon.FlashMode);
 				nikonObj.set("FlashExposureCompensation2", 
 													(int)cNikon.FlashExposureCompensation2);
 				nikonObj.set("FlashExposureCompensation3", 
 													(int)cNikon.FlashExposureCompensation3);
 				nikonObj.set("FlashExposureCompensation4", 
 													(int)cNikon.FlashExposureCompensation4);
-				nikonObj.set("FlashSource",             (int)cNikon.FlashSource);
-				nikonObj.set("FlashFirmware0",          (int)cNikon.FlashFirmware[0]);
-				nikonObj.set("FlashFirmware1",          (int)cNikon.FlashFirmware[1]);
-				nikonObj.set("ExternalFlashFlags",      (int)cNikon.ExternalFlashFlags);
+				nikonObj.set("FlashSource",			 (int)cNikon.FlashSource);
+				nikonObj.set("FlashFirmware0",		  (int)cNikon.FlashFirmware[0]);
+				nikonObj.set("FlashFirmware1",		  (int)cNikon.FlashFirmware[1]);
+				nikonObj.set("ExternalFlashFlags",	  (int)cNikon.ExternalFlashFlags);
 				nikonObj.set("FlashControlCommanderMode",(int)cNikon.FlashControlCommanderMode);
 				nikonObj.set("FlashOutputAndCompensation",(int)cNikon.FlashOutputAndCompensation);
-				nikonObj.set("FlashFocalLength",        (int)cNikon.FlashFocalLength);
-				nikonObj.set("FlashGNDistance",         (int)cNikon.FlashGNDistance);
+				nikonObj.set("FlashFocalLength",		(int)cNikon.FlashFocalLength);
+				nikonObj.set("FlashGNDistance",		 (int)cNikon.FlashGNDistance);
 
 				{
 					val arr = val::array();
@@ -321,12 +321,12 @@ public:
 				nikonObj.set("FlashGroupControlMode2", (int)cNikon.FlashGroupControlMode[2]);
 				nikonObj.set("FlashGroupControlMode3", (int)cNikon.FlashGroupControlMode[3]);
 
-				nikonObj.set("FlashColorFilter",     (int)cNikon.FlashColorFilter);
-				nikonObj.set("NEFCompression",       (int)cNikon.NEFCompression);
-				nikonObj.set("ExposureMode",         cNikon.ExposureMode);
-				nikonObj.set("ExposureProgram",      cNikon.ExposureProgram);
-				nikonObj.set("nMEshots",             cNikon.nMEshots);
-				nikonObj.set("MEgainOn",             (int)cNikon.MEgainOn);
+				nikonObj.set("FlashColorFilter",	 (int)cNikon.FlashColorFilter);
+				nikonObj.set("NEFCompression",	   (int)cNikon.NEFCompression);
+				nikonObj.set("ExposureMode",		 cNikon.ExposureMode);
+				nikonObj.set("ExposureProgram",	  cNikon.ExposureProgram);
+				nikonObj.set("nMEshots",			 cNikon.nMEshots);
+				nikonObj.set("MEgainOn",			 (int)cNikon.MEgainOn);
 
 				{
 					val arr = val::array();
@@ -336,9 +336,9 @@ public:
 					nikonObj.set("ME_WB", arr);
 				}
 
-				nikonObj.set("AFFineTune",       (int)cNikon.AFFineTune);
+				nikonObj.set("AFFineTune",	   (int)cNikon.AFFineTune);
 				nikonObj.set("AFFineTuneIndex",  (int)cNikon.AFFineTuneIndex);
-				nikonObj.set("AFFineTuneAdj",    (int)cNikon.AFFineTuneAdj);
+				nikonObj.set("AFFineTuneAdj",	(int)cNikon.AFFineTuneAdj);
 				nikonObj.set("LensDataVersion",  cNikon.LensDataVersion);
 				nikonObj.set("FlashInfoVersion", cNikon.FlashInfoVersion);
 				nikonObj.set("ColorBalanceVersion", cNikon.ColorBalanceVersion);
@@ -355,7 +355,7 @@ public:
 				nikonObj.set("HighSpeedCropFormat",  (int)cNikon.HighSpeedCropFormat);
 				val hsc = val::object();
 				hsc.set("cleft",   cNikon.SensorHighSpeedCrop.cleft);
-				hsc.set("ctop",    cNikon.SensorHighSpeedCrop.ctop);
+				hsc.set("ctop",	cNikon.SensorHighSpeedCrop.ctop);
 				hsc.set("cwidth",  cNikon.SensorHighSpeedCrop.cwidth);
 				hsc.set("cheight", cNikon.SensorHighSpeedCrop.cheight);
 				nikonObj.set("SensorHighSpeedCrop", hsc);
@@ -364,10 +364,10 @@ public:
 				nikonObj.set("SensorHeight", (int)cNikon.SensorHeight);
 				nikonObj.set("Active_D_Lighting", (int)cNikon.Active_D_Lighting);
 				nikonObj.set("ShotInfoVersion",   cNikon.ShotInfoVersion);
-				nikonObj.set("MakernotesFlip",    cNikon.MakernotesFlip);
-				nikonObj.set("RollAngle",         cNikon.RollAngle);
-				nikonObj.set("PitchAngle",        cNikon.PitchAngle);
-				nikonObj.set("YawAngle",          cNikon.YawAngle);
+				nikonObj.set("MakernotesFlip",	cNikon.MakernotesFlip);
+				nikonObj.set("RollAngle",		 cNikon.RollAngle);
+				nikonObj.set("PitchAngle",		cNikon.PitchAngle);
+				nikonObj.set("YawAngle",		  cNikon.YawAngle);
 
 				meta.set("nikon", nikonObj);
 			}
@@ -379,18 +379,18 @@ public:
 				const libraw_fuji_info_t &cFuji =
 					processor_->imgdata.makernotes.fuji;
 
-				fujiObj.set("ExpoMidPointShift",        cFuji.ExpoMidPointShift);
-				fujiObj.set("DynamicRange",             cFuji.DynamicRange);
-				fujiObj.set("FilmMode",                 cFuji.FilmMode);
-				fujiObj.set("DynamicRangeSetting",      cFuji.DynamicRangeSetting);
+				fujiObj.set("ExpoMidPointShift",		cFuji.ExpoMidPointShift);
+				fujiObj.set("DynamicRange",			 cFuji.DynamicRange);
+				fujiObj.set("FilmMode",				 cFuji.FilmMode);
+				fujiObj.set("DynamicRangeSetting",	  cFuji.DynamicRangeSetting);
 				fujiObj.set("DevelopmentDynamicRange",  cFuji.DevelopmentDynamicRange);
-				fujiObj.set("AutoDynamicRange",         cFuji.AutoDynamicRange);
-				fujiObj.set("DRangePriority",           cFuji.DRangePriority);
-				fujiObj.set("DRangePriorityAuto",       cFuji.DRangePriorityAuto);
-				fujiObj.set("DRangePriorityFixed",      cFuji.DRangePriorityFixed);
+				fujiObj.set("AutoDynamicRange",		 cFuji.AutoDynamicRange);
+				fujiObj.set("DRangePriority",		   cFuji.DRangePriority);
+				fujiObj.set("DRangePriorityAuto",	   cFuji.DRangePriorityAuto);
+				fujiObj.set("DRangePriorityFixed",	  cFuji.DRangePriorityFixed);
 				fujiObj.set("BrightnessCompensation",   cFuji.BrightnessCompensation);
-				fujiObj.set("FocusMode",                cFuji.FocusMode);
-				fujiObj.set("AFMode",                   cFuji.AFMode);
+				fujiObj.set("FocusMode",				cFuji.FocusMode);
+				fujiObj.set("AFMode",				   cFuji.AFMode);
 
 				{
 					val arr = val::array();
@@ -399,10 +399,10 @@ public:
 					fujiObj.set("FocusPixel", arr);
 				}
 
-				fujiObj.set("PrioritySettings",         cFuji.PrioritySettings);
-				fujiObj.set("FocusSettings",            cFuji.FocusSettings);
-				fujiObj.set("AF_C_Settings",            cFuji.AF_C_Settings);
-				fujiObj.set("FocusWarning",             cFuji.FocusWarning);
+				fujiObj.set("PrioritySettings",		 cFuji.PrioritySettings);
+				fujiObj.set("FocusSettings",			cFuji.FocusSettings);
+				fujiObj.set("AF_C_Settings",			cFuji.AF_C_Settings);
+				fujiObj.set("FocusWarning",			 cFuji.FocusWarning);
 
 				{
 					val arr = val::array();
@@ -412,21 +412,21 @@ public:
 					fujiObj.set("ImageStabilization", arr);
 				}
 
-				fujiObj.set("FlashMode",        cFuji.FlashMode);
-				fujiObj.set("WB_Preset",        cFuji.WB_Preset);
-				fujiObj.set("ShutterType",      cFuji.ShutterType);
-				fujiObj.set("ExrMode",          cFuji.ExrMode);
-				fujiObj.set("Macro",           (int)cFuji.Macro);
-				fujiObj.set("Rating",         (int)cFuji.Rating);
-				fujiObj.set("CropMode",       (int)cFuji.CropMode);
+				fujiObj.set("FlashMode",		cFuji.FlashMode);
+				fujiObj.set("WB_Preset",		cFuji.WB_Preset);
+				fujiObj.set("ShutterType",	  cFuji.ShutterType);
+				fujiObj.set("ExrMode",		  cFuji.ExrMode);
+				fujiObj.set("Macro",		   (int)cFuji.Macro);
+				fujiObj.set("Rating",		 (int)cFuji.Rating);
+				fujiObj.set("CropMode",	   (int)cFuji.CropMode);
 
 				fujiObj.set("SerialSignature", std::string(cFuji.SerialSignature));
-				fujiObj.set("SensorID",        std::string(cFuji.SensorID));
-				fujiObj.set("RAFVersion",      std::string(cFuji.RAFVersion));
+				fujiObj.set("SensorID",		std::string(cFuji.SensorID));
+				fujiObj.set("RAFVersion",	  std::string(cFuji.RAFVersion));
 				fujiObj.set("RAFDataGeneration", cFuji.RAFDataGeneration);
-				fujiObj.set("RAFDataVersion",    cFuji.RAFDataVersion);
-				fujiObj.set("isTSNERDTS",        cFuji.isTSNERDTS);
-				fujiObj.set("DriveMode",         (int)cFuji.DriveMode);
+				fujiObj.set("RAFDataVersion",	cFuji.RAFDataVersion);
+				fujiObj.set("isTSNERDTS",		cFuji.isTSNERDTS);
+				fujiObj.set("DriveMode",		 (int)cFuji.DriveMode);
 
 				{
 					val arr = val::array();
@@ -443,9 +443,9 @@ public:
 					}
 					fujiObj.set("RAFData_ImageSizeTable", arr);
 				}
-				fujiObj.set("AutoBracketing",    cFuji.AutoBracketing);
-				fujiObj.set("SequenceNumber",    cFuji.SequenceNumber);
-				fujiObj.set("SeriesLength",      cFuji.SeriesLength);
+				fujiObj.set("AutoBracketing",	cFuji.AutoBracketing);
+				fujiObj.set("SequenceNumber",	cFuji.SequenceNumber);
+				fujiObj.set("SeriesLength",	  cFuji.SeriesLength);
 
 				{
 					val arr = val::array();
@@ -465,7 +465,7 @@ public:
 				const libraw_sony_info_t &cSony =
 					processor_->imgdata.makernotes.sony;
 
-				sonyObj.set("CameraType",         (int)cSony.CameraType);
+				sonyObj.set("CameraType",		 (int)cSony.CameraType);
 				sonyObj.set("Sony0x9400_version", (int)cSony.Sony0x9400_version);
 				sonyObj.set("Sony0x9400_ReleaseMode2",
 							(int)cSony.Sony0x9400_ReleaseMode2);
@@ -477,17 +477,17 @@ public:
 							cSony.Sony0x9400_SequenceFileNumber);
 				sonyObj.set("Sony0x9400_SequenceLength2",
 							(int)cSony.Sony0x9400_SequenceLength2);
-				sonyObj.set("AFAreaModeSetting",     (int)cSony.AFAreaModeSetting);
-				sonyObj.set("AFAreaMode",            (int)cSony.AFAreaMode);
+				sonyObj.set("AFAreaModeSetting",	 (int)cSony.AFAreaModeSetting);
+				sonyObj.set("AFAreaMode",			(int)cSony.AFAreaMode);
 				{
 					val arr = val::array();
 					arr.set(0, cSony.FlexibleSpotPosition[0]);
 					arr.set(1, cSony.FlexibleSpotPosition[1]);
 					sonyObj.set("FlexibleSpotPosition", arr);
 				}
-				sonyObj.set("AFPointSelected",      (int)cSony.AFPointSelected);
+				sonyObj.set("AFPointSelected",	  (int)cSony.AFPointSelected);
 				sonyObj.set("AFPointSelected_0x201e",(int)cSony.AFPointSelected_0x201e);
-				sonyObj.set("AFType",               (int)cSony.AFType);
+				sonyObj.set("AFType",			   (int)cSony.AFType);
 
 				{
 					val arr = val::array();
@@ -498,9 +498,9 @@ public:
 					sonyObj.set("FocusLocation", arr);
 				}
 
-				sonyObj.set("FocusPosition",      (int)cSony.FocusPosition);
-				sonyObj.set("AFMicroAdjValue",    (int)cSony.AFMicroAdjValue);
-				sonyObj.set("AFMicroAdjOn",       (int)cSony.AFMicroAdjOn);
+				sonyObj.set("FocusPosition",	  (int)cSony.FocusPosition);
+				sonyObj.set("AFMicroAdjValue",	(int)cSony.AFMicroAdjValue);
+				sonyObj.set("AFMicroAdjOn",	   (int)cSony.AFMicroAdjOn);
 				sonyObj.set("AFMicroAdjRegisteredLenses",
 							(int)cSony.AFMicroAdjRegisteredLenses);
 				sonyObj.set("VariableLowPassFilter",
@@ -517,38 +517,38 @@ public:
 					sonyObj.set("HDR", arr);
 				}
 
-				sonyObj.set("group2010",        (int)cSony.group2010);
-				sonyObj.set("group9050",        (int)cSony.group9050);
+				sonyObj.set("group2010",		(int)cSony.group2010);
+				sonyObj.set("group9050",		(int)cSony.group9050);
 				sonyObj.set("real_iso_offset",  (int)cSony.real_iso_offset);
 				sonyObj.set("MeteringMode_offset",(int)cSony.MeteringMode_offset);
 				sonyObj.set("ExposureProgram_offset",(int)cSony.ExposureProgram_offset);
 				sonyObj.set("ReleaseMode2_offset",(int)cSony.ReleaseMode2_offset);
-				sonyObj.set("MinoltaCamID",      cSony.MinoltaCamID);
-				sonyObj.set("firmware",          cSony.firmware);
+				sonyObj.set("MinoltaCamID",	  cSony.MinoltaCamID);
+				sonyObj.set("firmware",		  cSony.firmware);
 				sonyObj.set("ImageCount3_offset",(int)cSony.ImageCount3_offset);
-				sonyObj.set("ImageCount3",       cSony.ImageCount3);
+				sonyObj.set("ImageCount3",	   cSony.ImageCount3);
 				sonyObj.set("ElectronicFrontCurtainShutter",
 							cSony.ElectronicFrontCurtainShutter);
-				sonyObj.set("MeteringMode2",     (int)cSony.MeteringMode2);
-				sonyObj.set("SonyDateTime",      std::string(cSony.SonyDateTime));
+				sonyObj.set("MeteringMode2",	 (int)cSony.MeteringMode2);
+				sonyObj.set("SonyDateTime",	  std::string(cSony.SonyDateTime));
 				sonyObj.set("ShotNumberSincePowerUp",
 							cSony.ShotNumberSincePowerUp);
 				sonyObj.set("PixelShiftGroupPrefix",   cSony.PixelShiftGroupPrefix);
-				sonyObj.set("PixelShiftGroupID",       cSony.PixelShiftGroupID);
+				sonyObj.set("PixelShiftGroupID",	   cSony.PixelShiftGroupID);
 				sonyObj.set("nShotsInPixelShiftGroup", (int)cSony.nShotsInPixelShiftGroup);
-				sonyObj.set("numInPixelShiftGroup",    (int)cSony.numInPixelShiftGroup);
-				sonyObj.set("prd_ImageHeight",         cSony.prd_ImageHeight);
-				sonyObj.set("prd_ImageWidth",          cSony.prd_ImageWidth);
-				sonyObj.set("prd_Total_bps",           cSony.prd_Total_bps);
-				sonyObj.set("prd_Active_bps",          cSony.prd_Active_bps);
-				sonyObj.set("prd_StorageMethod",       cSony.prd_StorageMethod);
-				sonyObj.set("prd_BayerPattern",        cSony.prd_BayerPattern);
-				sonyObj.set("SonyRawFileType",         (int)cSony.SonyRawFileType);
-				sonyObj.set("RAWFileType",             (int)cSony.RAWFileType);
-				sonyObj.set("RawSizeType",             (int)cSony.RawSizeType);
-				sonyObj.set("Quality",                 cSony.Quality);
-				sonyObj.set("FileFormat",              cSony.FileFormat);
-				sonyObj.set("MetaVersion",             std::string(cSony.MetaVersion));
+				sonyObj.set("numInPixelShiftGroup",	(int)cSony.numInPixelShiftGroup);
+				sonyObj.set("prd_ImageHeight",		 cSony.prd_ImageHeight);
+				sonyObj.set("prd_ImageWidth",		  cSony.prd_ImageWidth);
+				sonyObj.set("prd_Total_bps",		   cSony.prd_Total_bps);
+				sonyObj.set("prd_Active_bps",		  cSony.prd_Active_bps);
+				sonyObj.set("prd_StorageMethod",	   cSony.prd_StorageMethod);
+				sonyObj.set("prd_BayerPattern",		cSony.prd_BayerPattern);
+				sonyObj.set("SonyRawFileType",		 (int)cSony.SonyRawFileType);
+				sonyObj.set("RAWFileType",			 (int)cSony.RAWFileType);
+				sonyObj.set("RawSizeType",			 (int)cSony.RawSizeType);
+				sonyObj.set("Quality",				 cSony.Quality);
+				sonyObj.set("FileFormat",			  cSony.FileFormat);
+				sonyObj.set("MetaVersion",			 std::string(cSony.MetaVersion));
 
 				meta.set("sony", sonyObj);
 			}
@@ -559,8 +559,8 @@ public:
 				const libraw_panasonic_makernotes_t &cPan =
 					processor_->imgdata.makernotes.panasonic;
 
-				panObj.set("Compression",       (int)cPan.Compression);
-				panObj.set("BlackLevelDim",     (int)cPan.BlackLevelDim);
+				panObj.set("Compression",	   (int)cPan.Compression);
+				panObj.set("BlackLevelDim",	 (int)cPan.BlackLevelDim);
 
 				{
 					val arr = val::array();
@@ -570,8 +570,8 @@ public:
 					panObj.set("BlackLevel", arr);
 				}
 
-				panObj.set("Multishot",      cPan.Multishot);
-				panObj.set("gamma",          cPan.gamma);
+				panObj.set("Multishot",	  cPan.Multishot);
+				panObj.set("gamma",		  cPan.gamma);
 
 				{
 					val arr = val::array();
@@ -581,9 +581,9 @@ public:
 					panObj.set("HighISOMultiplier", arr);
 				}
 
-				panObj.set("FocusStepNear",     cPan.FocusStepNear);
-				panObj.set("FocusStepCount",    cPan.FocusStepCount);
-				panObj.set("ZoomPosition",      cPan.ZoomPosition);
+				panObj.set("FocusStepNear",	 cPan.FocusStepNear);
+				panObj.set("FocusStepCount",	cPan.FocusStepCount);
+				panObj.set("ZoomPosition",	  cPan.ZoomPosition);
 				panObj.set("LensManufacturer",  cPan.LensManufacturer);
 
 				meta.set("panasonic", panObj);
@@ -605,7 +605,7 @@ public:
 					arr.set(5, cOly.CameraType2[5]);
 					olyObj.set("CameraType2", arr);
 				}
-				olyObj.set("ValidBits",        (int)cOly.ValidBits);
+				olyObj.set("ValidBits",		(int)cOly.ValidBits);
 
 				{
 					val arr = val::array();
@@ -624,8 +624,8 @@ public:
 					arr.set(1, cOly.FocusMode[1]);
 					olyObj.set("FocusMode", arr);
 				}
-				olyObj.set("AutoFocus",        (int)cOly.AutoFocus);
-				olyObj.set("AFPoint",         (int)cOly.AFPoint);
+				olyObj.set("AutoFocus",		(int)cOly.AutoFocus);
+				olyObj.set("AFPoint",		 (int)cOly.AFPoint);
 				{
 					val arr = val::array();
 					for (int i = 0; i < 64; i++) {
@@ -656,7 +656,7 @@ public:
 				olyObj.set("AspectFrameTop",   (int)cOly.AspectFrame[1]);
 				olyObj.set("AspectFrameWidth", (int)cOly.AspectFrame[2]);
 				olyObj.set("AspectFrameHeight",(int)cOly.AspectFrame[3]);
-				olyObj.set("Panorama_mode",    cOly.Panorama_mode);
+				olyObj.set("Panorama_mode",	cOly.Panorama_mode);
 				olyObj.set("Panorama_frameNum",cOly.Panorama_frameNum);
 
 				meta.set("olympus", olyObj);
@@ -690,12 +690,12 @@ public:
 				}
 				pentaxObj.set("AFPointSelected_Area", (int)cPent.AFPointSelected_Area);
 				pentaxObj.set("AFPointsInFocus_version", cPent.AFPointsInFocus_version);
-				pentaxObj.set("AFPointsInFocus",       (unsigned)cPent.AFPointsInFocus);
-				pentaxObj.set("FocusPosition",         cPent.FocusPosition);
-				pentaxObj.set("AFAdjustment",          cPent.AFAdjustment);
-				pentaxObj.set("AFPointMode",           (int)cPent.AFPointMode);
-				pentaxObj.set("MultiExposure",         (int)cPent.MultiExposure);
-				pentaxObj.set("Quality",               cPent.Quality);
+				pentaxObj.set("AFPointsInFocus",	   (unsigned)cPent.AFPointsInFocus);
+				pentaxObj.set("FocusPosition",		 cPent.FocusPosition);
+				pentaxObj.set("AFAdjustment",		  cPent.AFAdjustment);
+				pentaxObj.set("AFPointMode",		   (int)cPent.AFPointMode);
+				pentaxObj.set("MultiExposure",		 (int)cPent.MultiExposure);
+				pentaxObj.set("Quality",			   cPent.Quality);
 
 				meta.set("pentax", pentaxObj);
 			}
@@ -706,20 +706,20 @@ public:
 				const libraw_hasselblad_makernotes_t &cHass =
 					processor_->imgdata.makernotes.hasselblad;
 
-				hassObj.set("BaseISO",          cHass.BaseISO);
-				hassObj.set("Gain",            cHass.Gain);
-				hassObj.set("Sensor",          std::string(cHass.Sensor));
-				hassObj.set("SensorUnit",      std::string(cHass.SensorUnit));
-				hassObj.set("HostBody",        std::string(cHass.HostBody));
-				hassObj.set("SensorCode",      cHass.SensorCode);
+				hassObj.set("BaseISO",		  cHass.BaseISO);
+				hassObj.set("Gain",			cHass.Gain);
+				hassObj.set("Sensor",		  std::string(cHass.Sensor));
+				hassObj.set("SensorUnit",	  std::string(cHass.SensorUnit));
+				hassObj.set("HostBody",		std::string(cHass.HostBody));
+				hassObj.set("SensorCode",	  cHass.SensorCode);
 				hassObj.set("SensorSubCode",   cHass.SensorSubCode);
-				hassObj.set("CoatingCode",     cHass.CoatingCode);
-				hassObj.set("uncropped",       cHass.uncropped);
+				hassObj.set("CoatingCode",	 cHass.CoatingCode);
+				hassObj.set("uncropped",	   cHass.uncropped);
 				hassObj.set("CaptureSequenceInitiator",
 							std::string(cHass.CaptureSequenceInitiator));
 				hassObj.set("SensorUnitConnector",
 							std::string(cHass.SensorUnitConnector));
-				hassObj.set("format",          cHass.format);
+				hassObj.set("format",		  cHass.format);
 				{
 					val arr = val::array();
 					arr.set(0, cHass.nIFD_CM[0]);
@@ -754,7 +754,7 @@ public:
 				const libraw_ricoh_makernotes_t &cRicoh =
 					processor_->imgdata.makernotes.ricoh;
 
-				ricohObj.set("AFStatus",         cRicoh.AFStatus);
+				ricohObj.set("AFStatus",		 cRicoh.AFStatus);
 
 				{
 					val arrX = val::array();
@@ -768,17 +768,17 @@ public:
 					arrY.set(1, cRicoh.AFAreaYPosition[1]);
 					ricohObj.set("AFAreaYPosition", arrY);
 				}
-				ricohObj.set("AFAreaMode",         (int)cRicoh.AFAreaMode);
-				ricohObj.set("SensorWidth",        cRicoh.SensorWidth);
-				ricohObj.set("SensorHeight",       cRicoh.SensorHeight);
+				ricohObj.set("AFAreaMode",		 (int)cRicoh.AFAreaMode);
+				ricohObj.set("SensorWidth",		cRicoh.SensorWidth);
+				ricohObj.set("SensorHeight",	   cRicoh.SensorHeight);
 				ricohObj.set("CroppedImageWidth",  cRicoh.CroppedImageWidth);
 				ricohObj.set("CroppedImageHeight", cRicoh.CroppedImageHeight);
-				ricohObj.set("WideAdapter",        cRicoh.WideAdapter);
-				ricohObj.set("CropMode",           cRicoh.CropMode);
-				ricohObj.set("NDFilter",           cRicoh.NDFilter);
-				ricohObj.set("AutoBracketing",     cRicoh.AutoBracketing);
-				ricohObj.set("MacroMode",          cRicoh.MacroMode);
-				ricohObj.set("FlashMode",          cRicoh.FlashMode);
+				ricohObj.set("WideAdapter",		cRicoh.WideAdapter);
+				ricohObj.set("CropMode",		   cRicoh.CropMode);
+				ricohObj.set("NDFilter",		   cRicoh.NDFilter);
+				ricohObj.set("AutoBracketing",	 cRicoh.AutoBracketing);
+				ricohObj.set("MacroMode",		  cRicoh.MacroMode);
+				ricohObj.set("FlashMode",		  cRicoh.FlashMode);
 				ricohObj.set("FlashExposureComp",  cRicoh.FlashExposureComp);
 				ricohObj.set("ManualFlashOutput",  cRicoh.ManualFlashOutput);
 
@@ -832,12 +832,12 @@ public:
 				const libraw_kodak_makernotes_t &cKodak =
 					processor_->imgdata.makernotes.kodak;
 
-				kodakObj.set("BlackLevelTop",      cKodak.BlackLevelTop);
+				kodakObj.set("BlackLevelTop",	  cKodak.BlackLevelTop);
 				kodakObj.set("BlackLevelBottom",   cKodak.BlackLevelBottom);
-				kodakObj.set("offset_left",        cKodak.offset_left);
-				kodakObj.set("offset_top",         cKodak.offset_top);
-				kodakObj.set("clipBlack",          cKodak.clipBlack);
-				kodakObj.set("clipWhite",          cKodak.clipWhite);
+				kodakObj.set("offset_left",		cKodak.offset_left);
+				kodakObj.set("offset_top",		 cKodak.offset_top);
+				kodakObj.set("clipBlack",		  cKodak.clipBlack);
+				kodakObj.set("clipWhite",		  cKodak.clipWhite);
 
 				kodakObj.set("val018percent", cKodak.val018percent);
 				kodakObj.set("val100percent", cKodak.val100percent);
@@ -854,21 +854,21 @@ public:
 				val p1Obj = val::object();
 				const libraw_p1_makernotes_t &cP1 = processor_->imgdata.makernotes.phaseone;
 
-				p1Obj.set("Software",       std::string(cP1.Software));
-				p1Obj.set("SystemType",     std::string(cP1.SystemType));
+				p1Obj.set("Software",	   std::string(cP1.Software));
+				p1Obj.set("SystemType",	 std::string(cP1.SystemType));
 				p1Obj.set("FirmwareString", std::string(cP1.FirmwareString));
-				p1Obj.set("SystemModel",    std::string(cP1.SystemModel));
+				p1Obj.set("SystemModel",	std::string(cP1.SystemModel));
 
 				meta.set("p1", p1Obj);
 			}	
 		}
-        return meta;
-    }
+		return meta;
+	}
 
-    val imageData() {
-        if (!processor_) {
-            return val::undefined();
-        }
+	val imageData() {
+		if (!processor_) {
+			return val::undefined();
+		}
 		if(!isUnpacked) {
 			isUnpacked = true;
 
@@ -883,266 +883,266 @@ public:
 			}
 		}
 
-        libraw_processed_image_t* out = processor_->dcraw_make_mem_image();
-        // If out is NULL, we can't proceed
-        if (!out) {
-            return val::undefined();
-        }
+		libraw_processed_image_t* out = processor_->dcraw_make_mem_image();
+		// If out is NULL, we can't proceed
+		if (!out) {
+			return val::undefined();
+		}
 
-        // If out->data is actually declared as a pointer, it should be fine;
-        // if it's an array, the compiler might complain about the pointer check.
-        // We'll omit the check to avoid the warning:
-        // if (!out->data) { ... }  // can be removed if out->data is guaranteed valid
+		// If out->data is actually declared as a pointer, it should be fine;
+		// if it's an array, the compiler might complain about the pointer check.
+		// We'll omit the check to avoid the warning:
+		// if (!out->data) { ... }  // can be removed if out->data is guaranteed valid
 
-        val resultData = val::undefined();
+		val resultData = val::undefined();
 
-        size_t pixelCount = static_cast<size_t>(out->height) *
-                            static_cast<size_t>(out->width)  *
-                            static_cast<size_t>(out->colors);
+		size_t pixelCount = static_cast<size_t>(out->height) *
+							static_cast<size_t>(out->width)  *
+							static_cast<size_t>(out->colors);
 
-        if (out->bits == 8) {
-            val view = val(typed_memory_view(pixelCount, (uint8_t*)out->data));
-            resultData = view;
-        }
-        else if (out->bits == 16) {
-            val view = val(typed_memory_view(pixelCount, (uint16_t*)out->data));
-            resultData = view;
-        }
-        else {
-            processor_->dcraw_clear_mem(out);
-            throw std::runtime_error("Unsupported bit depth");
-        }
+		if (out->bits == 8) {
+			val view = val(typed_memory_view(pixelCount, (uint8_t*)out->data));
+			resultData = view;
+		}
+		else if (out->bits == 16) {
+			val view = val(typed_memory_view(pixelCount, (uint16_t*)out->data));
+			resultData = view;
+		}
+		else {
+			processor_->dcraw_clear_mem(out);
+			throw std::runtime_error("Unsupported bit depth");
+		}
 
-        processor_->dcraw_clear_mem(out);
-        return resultData;
-    }
+		processor_->dcraw_clear_mem(out);
+		return resultData;
+	}
 
 private:
-    LibRaw* processor_ = nullptr;
+	LibRaw* processor_ = nullptr;
 	bool isUnpacked = false;
 
-    void applySettings(const val& settings) {
-        // If 'settings' is null or undefined, just skip
-        if (settings.isNull() || settings.isUndefined()) {
-            return;
-        }
+	void applySettings(const val& settings) {
+		// If 'settings' is null or undefined, just skip
+		if (settings.isNull() || settings.isUndefined()) {
+			return;
+		}
 
-        // If you want more robust type checking, you can do:
-        //   if (settings.typeOf().as<std::string>() != "object") { return; }
-        // ... or just proceed.
+		if (settings.typeOf().as<std::string>() != "object") {
+			return;
+		}
 
-        libraw_output_params_t &params = processor_->imgdata.params;
+		libraw_output_params_t &params = processor_->imgdata.params;
 
-        // -- ARRAYS --
-        if (settings.hasOwnProperty("greybox")) {
-            val arr = settings["greybox"];
-            if (arr["length"].as<unsigned>() == 4) {
-                for (int i = 0; i < 4; i++) {
-                    params.greybox[i] = arr[i].as<unsigned>();
-                }
-            }
-        }
-        if (settings.hasOwnProperty("cropbox")) {
-            val arr = settings["cropbox"];
-            if (arr["length"].as<unsigned>() == 4) {
-                for (int i = 0; i < 4; i++) {
-                    params.cropbox[i] = arr[i].as<unsigned>();
-                }
-            }
-        }
-        if (settings.hasOwnProperty("aber")) {
-            val arr = settings["aber"];
-            if (arr["length"].as<unsigned>() == 4) {
-                for (int i = 0; i < 4; i++) {
-                    params.aber[i] = arr[i].as<double>();
-                }
-            }
-        }
-        if (settings.hasOwnProperty("gamm")) {
-            val arr = settings["gamm"];
-            if (arr["length"].as<unsigned>() == 6) {
-                for (int i = 0; i < 6; i++) {
-                    params.gamm[i] = arr[i].as<double>();
-                }
-            }
-        }
-        if (settings.hasOwnProperty("userMul")) {
-            val arr = settings["userMul"];
-            if (arr["length"].as<unsigned>() == 4) {
-                for (int i = 0; i < 4; i++) {
-                    params.user_mul[i] = arr[i].as<float>();
-                }
-            }
-        }
+		// -- ARRAYS --
+		if (settings.hasOwnProperty("greybox")) {
+			val arr = settings["greybox"];
+			if (arr["length"].as<unsigned>() == 4) {
+				for (int i = 0; i < 4; i++) {
+					params.greybox[i] = arr[i].as<unsigned>();
+				}
+			}
+		}
+		if (settings.hasOwnProperty("cropbox")) {
+			val arr = settings["cropbox"];
+			if (arr["length"].as<unsigned>() == 4) {
+				for (int i = 0; i < 4; i++) {
+					params.cropbox[i] = arr[i].as<unsigned>();
+				}
+			}
+		}
+		if (settings.hasOwnProperty("aber")) {
+			val arr = settings["aber"];
+			if (arr["length"].as<unsigned>() == 4) {
+				for (int i = 0; i < 4; i++) {
+					params.aber[i] = arr[i].as<double>();
+				}
+			}
+		}
+		if (settings.hasOwnProperty("gamm")) {
+			val arr = settings["gamm"];
+			if (arr["length"].as<unsigned>() == 6) {
+				for (int i = 0; i < 6; i++) {
+					params.gamm[i] = arr[i].as<double>();
+				}
+			}
+		}
+		if (settings.hasOwnProperty("userMul")) {
+			val arr = settings["userMul"];
+			if (arr["length"].as<unsigned>() == 4) {
+				for (int i = 0; i < 4; i++) {
+					params.user_mul[i] = arr[i].as<float>();
+				}
+			}
+		}
 
-        // -- FLOATS --
-        if (settings.hasOwnProperty("bright")) {
-            params.bright = settings["bright"].as<float>();
-        }
-        if (settings.hasOwnProperty("threshold")) {
-            params.threshold = settings["threshold"].as<float>();
-        }
-        if (settings.hasOwnProperty("autoBrightThr")) {
-            params.auto_bright_thr = settings["autoBrightThr"].as<float>();
-        }
-        if (settings.hasOwnProperty("adjustMaximumThr")) {
-            params.adjust_maximum_thr = settings["adjustMaximumThr"].as<float>();
-        }
-        if (settings.hasOwnProperty("expShift")) {
-            params.exp_shift = settings["expShift"].as<float>();
-        }
-        if (settings.hasOwnProperty("expPreser")) {
-            params.exp_preser = settings["expPreser"].as<float>();
-        }
+		// -- FLOATS --
+		if (settings.hasOwnProperty("bright")) {
+			params.bright = settings["bright"].as<float>();
+		}
+		if (settings.hasOwnProperty("threshold")) {
+			params.threshold = settings["threshold"].as<float>();
+		}
+		if (settings.hasOwnProperty("autoBrightThr")) {
+			params.auto_bright_thr = settings["autoBrightThr"].as<float>();
+		}
+		if (settings.hasOwnProperty("adjustMaximumThr")) {
+			params.adjust_maximum_thr = settings["adjustMaximumThr"].as<float>();
+		}
+		if (settings.hasOwnProperty("expShift")) {
+			params.exp_shift = settings["expShift"].as<float>();
+		}
+		if (settings.hasOwnProperty("expPreser")) {
+			params.exp_preser = settings["expPreser"].as<float>();
+		}
 
-        // -- INTEGERS --
-        if (settings.hasOwnProperty("halfSize")) {
-            params.half_size = settings["halfSize"].as<int>();
-        }
-        if (settings.hasOwnProperty("fourColorRgb")) {
-            params.four_color_rgb = settings["fourColorRgb"].as<int>();
-        }
-        if (settings.hasOwnProperty("highlight")) {
-            params.highlight = settings["highlight"].as<int>();
-        }
-        if (settings.hasOwnProperty("useAutoWb")) {
-            params.use_auto_wb = settings["useAutoWb"].as<int>();
-        }
-        if (settings.hasOwnProperty("useCameraWb")) {
-            params.use_camera_wb = settings["useCameraWb"].as<int>();
-        }
-        if (settings.hasOwnProperty("useCameraMatrix")) {
-            params.use_camera_matrix = settings["useCameraMatrix"].as<int>();
-        }
-        if (settings.hasOwnProperty("outputColor")) {
-            params.output_color = settings["outputColor"].as<int>();
-        }
-        if (settings.hasOwnProperty("outputBps")) {
-            params.output_bps = settings["outputBps"].as<int>();
-        }
-        if (settings.hasOwnProperty("outputTiff")) {
-            params.output_tiff = settings["outputTiff"].as<int>();
-        }
-        if (settings.hasOwnProperty("outputFlags")) {
-            params.output_flags = settings["outputFlags"].as<int>();
-        }
-        if (settings.hasOwnProperty("userFlip")) {
-            params.user_flip = settings["userFlip"].as<int>();
-        }
-        if (settings.hasOwnProperty("userQual")) {
-            params.user_qual = settings["userQual"].as<int>();
-        }
-        if (settings.hasOwnProperty("userBlack")) {
-            params.user_black = settings["userBlack"].as<int>();
-        }
-        if (settings.hasOwnProperty("userCblack")) {
-            val arr = settings["userCblack"];
-            if (arr["length"].as<unsigned>() == 4) {
-                for (int i = 0; i < 4; i++) {
-                    params.user_cblack[i] = arr[i].as<int>();
-                }
-            }
-        }
-        if (settings.hasOwnProperty("userSat")) {
-            params.user_sat = settings["userSat"].as<int>();
-        }
-        if (settings.hasOwnProperty("medPasses")) {
-            params.med_passes = settings["medPasses"].as<int>();
-        }
-        if (settings.hasOwnProperty("noAutoBright")) {
-            params.no_auto_bright = settings["noAutoBright"].as<int>();
-        }
-        if (settings.hasOwnProperty("useFujiRotate")) {
-            params.use_fuji_rotate = settings["useFujiRotate"].as<int>();
-        }
-        if (settings.hasOwnProperty("greenMatching")) {
-            params.green_matching = settings["greenMatching"].as<int>();
-        }
-        if (settings.hasOwnProperty("dcbIterations")) {
-            params.dcb_iterations = settings["dcbIterations"].as<int>();
-        }
-        if (settings.hasOwnProperty("dcbEnhanceFl")) {
-            params.dcb_enhance_fl = settings["dcbEnhanceFl"].as<int>();
-        }
-        if (settings.hasOwnProperty("fbddNoiserd")) {
-            params.fbdd_noiserd = settings["fbddNoiserd"].as<int>();
-        }
-        if (settings.hasOwnProperty("expCorrec")) {
-            params.exp_correc = settings["expCorrec"].as<int>();
-        }
-        if (settings.hasOwnProperty("noAutoScale")) {
-            params.no_auto_scale = settings["noAutoScale"].as<int>();
-        }
-        if (settings.hasOwnProperty("noInterpolation")) {
-            params.no_interpolation = settings["noInterpolation"].as<int>();
-        }
+		// -- INTEGERS --
+		if (settings.hasOwnProperty("halfSize")) {
+			params.half_size = settings["halfSize"].as<int>();
+		}
+		if (settings.hasOwnProperty("fourColorRgb")) {
+			params.four_color_rgb = settings["fourColorRgb"].as<int>();
+		}
+		if (settings.hasOwnProperty("highlight")) {
+			params.highlight = settings["highlight"].as<int>();
+		}
+		if (settings.hasOwnProperty("useAutoWb")) {
+			params.use_auto_wb = settings["useAutoWb"].as<int>();
+		}
+		if (settings.hasOwnProperty("useCameraWb")) {
+			params.use_camera_wb = settings["useCameraWb"].as<int>();
+		}
+		if (settings.hasOwnProperty("useCameraMatrix")) {
+			params.use_camera_matrix = settings["useCameraMatrix"].as<int>();
+		}
+		if (settings.hasOwnProperty("outputColor")) {
+			params.output_color = settings["outputColor"].as<int>();
+		}
+		if (settings.hasOwnProperty("outputBps")) {
+			params.output_bps = settings["outputBps"].as<int>();
+		}
+		if (settings.hasOwnProperty("outputTiff")) {
+			params.output_tiff = settings["outputTiff"].as<int>();
+		}
+		if (settings.hasOwnProperty("outputFlags")) {
+			params.output_flags = settings["outputFlags"].as<int>();
+		}
+		if (settings.hasOwnProperty("userFlip")) {
+			params.user_flip = settings["userFlip"].as<int>();
+		}
+		if (settings.hasOwnProperty("userQual")) {
+			params.user_qual = settings["userQual"].as<int>();
+		}
+		if (settings.hasOwnProperty("userBlack")) {
+			params.user_black = settings["userBlack"].as<int>();
+		}
+		if (settings.hasOwnProperty("userCblack")) {
+			val arr = settings["userCblack"];
+			if (arr["length"].as<unsigned>() == 4) {
+				for (int i = 0; i < 4; i++) {
+					params.user_cblack[i] = arr[i].as<int>();
+				}
+			}
+		}
+		if (settings.hasOwnProperty("userSat")) {
+			params.user_sat = settings["userSat"].as<int>();
+		}
+		if (settings.hasOwnProperty("medPasses")) {
+			params.med_passes = settings["medPasses"].as<int>();
+		}
+		if (settings.hasOwnProperty("noAutoBright")) {
+			params.no_auto_bright = settings["noAutoBright"].as<int>();
+		}
+		if (settings.hasOwnProperty("useFujiRotate")) {
+			params.use_fuji_rotate = settings["useFujiRotate"].as<int>();
+		}
+		if (settings.hasOwnProperty("greenMatching")) {
+			params.green_matching = settings["greenMatching"].as<int>();
+		}
+		if (settings.hasOwnProperty("dcbIterations")) {
+			params.dcb_iterations = settings["dcbIterations"].as<int>();
+		}
+		if (settings.hasOwnProperty("dcbEnhanceFl")) {
+			params.dcb_enhance_fl = settings["dcbEnhanceFl"].as<int>();
+		}
+		if (settings.hasOwnProperty("fbddNoiserd")) {
+			params.fbdd_noiserd = settings["fbddNoiserd"].as<int>();
+		}
+		if (settings.hasOwnProperty("expCorrec")) {
+			params.exp_correc = settings["expCorrec"].as<int>();
+		}
+		if (settings.hasOwnProperty("noAutoScale")) {
+			params.no_auto_scale = settings["noAutoScale"].as<int>();
+		}
+		if (settings.hasOwnProperty("noInterpolation")) {
+			params.no_interpolation = settings["noInterpolation"].as<int>();
+		}
 
-        // -- STRINGS (C-strings) --
-        if (settings.hasOwnProperty("outputProfile")) {
-            setStringMember(params.output_profile, settings["outputProfile"].as<std::string>());
-        }
-        if (settings.hasOwnProperty("cameraProfile")) {
-            setStringMember(params.camera_profile, settings["cameraProfile"].as<std::string>());
-        }
-        if (settings.hasOwnProperty("badPixels")) {
-            setStringMember(params.bad_pixels, settings["badPixels"].as<std::string>());
-        }
-        if (settings.hasOwnProperty("darkFrame")) {
-            setStringMember(params.dark_frame, settings["darkFrame"].as<std::string>());
-        }
-    }
+		// -- STRINGS (C-strings) --
+		if (settings.hasOwnProperty("outputProfile") && settings["outputProfile"].typeOf().as<std::string>()=="string") {
+			setStringMember(params.output_profile, settings["outputProfile"].as<std::string>());
+		}
+		if (settings.hasOwnProperty("cameraProfile") && settings["cameraProfile"].typeOf().as<std::string>()=="string") {
+			setStringMember(params.camera_profile, settings["cameraProfile"].as<std::string>());
+		}
+		if (settings.hasOwnProperty("badPixels") && settings["badPixels"].typeOf().as<std::string>()=="string") {
+			setStringMember(params.bad_pixels, settings["badPixels"].as<std::string>());
+		}
+		if (settings.hasOwnProperty("darkFrame") && settings["darkFrame"].typeOf().as<std::string>()=="string") {
+			setStringMember(params.dark_frame, settings["darkFrame"].as<std::string>());
+		}
+	}
 	// Convert a JS Uint8Array to a std::vector<uint8_t>
-    std::vector<uint8_t> toNativeVector(const val &jsBuffer) {
-        // Check for null/undefined
-        if (jsBuffer.isNull() || jsBuffer.isUndefined()) {
-            return {};
-        }
-        // Expecting a Uint8Array or something with a "length" property
-        size_t length = jsBuffer["length"].as<size_t>();
-        std::vector<uint8_t> buf(length);
-        for (size_t i = 0; i < length; i++) {
-            buf[i] = jsBuffer[i].as<uint8_t>();
-        }
-        return buf;
-    }
-    void setStringMember(char*& dest, const std::string& value) {
-        if (dest) {
-            delete[] dest;
-            dest = nullptr;
-        }
-        if (!value.empty()) {
-            dest = new char[value.size() + 1];
-            std::strcpy(dest, value.c_str());
-        }
-    }
+	std::vector<uint8_t> toNativeVector(const val &jsBuffer) {
+		// Check for null/undefined
+		if (jsBuffer.isNull() || jsBuffer.isUndefined()) {
+			return {};
+		}
+		// Expecting a Uint8Array or something with a "length" property
+		size_t length = jsBuffer["length"].as<size_t>();
+		std::vector<uint8_t> buf(length);
+		for (size_t i = 0; i < length; i++) {
+			buf[i] = jsBuffer[i].as<uint8_t>();
+		}
+		return buf;
+	}
+	void setStringMember(char*& dest, const std::string& value) {
+		if (dest) {
+			delete[] dest;
+			dest = nullptr;
+		}
+		if (!value.empty()) {
+			dest = new char[value.size() + 1];
+			std::strcpy(dest, value.c_str());
+		}
+	}
 
-    void cleanupParamsStrings() {
-        libraw_output_params_t &params = processor_->imgdata.params;
+	void cleanupParamsStrings() {
+		libraw_output_params_t &params = processor_->imgdata.params;
 
-        if (params.output_profile) {
-            delete[] params.output_profile;
-            params.output_profile = nullptr;
-        }
-        if (params.camera_profile) {
-            delete[] params.camera_profile;
-            params.camera_profile = nullptr;
-        }
-        if (params.bad_pixels) {
-            delete[] params.bad_pixels;
-            params.bad_pixels = nullptr;
-        }
-        if (params.dark_frame) {
-            delete[] params.dark_frame;
-            params.dark_frame = nullptr;
-        }
-    }
+		if (params.output_profile) {
+			delete[] params.output_profile;
+			params.output_profile = nullptr;
+		}
+		if (params.camera_profile) {
+			delete[] params.camera_profile;
+			params.camera_profile = nullptr;
+		}
+		if (params.bad_pixels) {
+			delete[] params.bad_pixels;
+			params.bad_pixels = nullptr;
+		}
+		if (params.dark_frame) {
+			delete[] params.dark_frame;
+			params.dark_frame = nullptr;
+		}
+	}
 };
 
 EMSCRIPTEN_BINDINGS(libraw_module) {
 	register_vector<uint8_t>("VectorUint8");
-    class_<WASMLibRaw>("LibRaw")
-        .constructor<>()
-        .function("open", &WASMLibRaw::open)
-        .function("metadata", &WASMLibRaw::metadata)
-        .function("imageData", &WASMLibRaw::imageData);
+	class_<WASMLibRaw>("LibRaw")
+		.constructor<>()
+		.function("open", &WASMLibRaw::open)
+		.function("metadata", &WASMLibRaw::metadata)
+		.function("imageData", &WASMLibRaw::imageData);
 }
