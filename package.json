@@ -1,16 +1,25 @@
 {
 	"name": "libraw-wasm",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "LibRaw WASM bindings to be able to use it in the browser.",
-	"main": "index.js",
+	"main": "dist/index.js",
 	"type": "module",
 	"directories": {
 		"lib": "lib"
 	},
 	"scripts": {
-		"example": "python -m http.server"
+		"example": "python -m http.server",
+		"build": "node build.js"
 	},
-	"files": ["index.js", "libraw.js", "libraw.wasm"],
+	"files": [
+		"dist/*",
+		"index.js",
+		"libraw.js",
+		"libraw.wasm"
+	],
 	"author": "ybouane",
-	"license": "ISC"
+	"license": "ISC",
+	"devDependencies": {
+		"esbuild": "^0.24.2"
+	}
 }
