@@ -5,7 +5,7 @@ import { promises as fs } from "fs";
 (async () => {
 	try {
 		await build({
-			entryPoints: ['index.js'], // Entry point of your library
+			entryPoints: ['index.js', 'worker.js'], // Entry point of your library
 			outdir: 'dist', // Output directory
 			bundle: true, // Bundle all files
 			minify: true, // Minify the output

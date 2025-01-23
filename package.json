@@ -14,6 +14,7 @@
 	"files": [
 		"dist/*",
 		"index.js",
+		"worker.js",
 		"libraw.js",
 		"libraw.wasm"
 	],

@@ -1,41 +1,46 @@
-import LibRawModule from './libraw.js';
-
-let _modulePromise = null;
-
-/**
- * Returns a Promise that resolves to the loaded Emscripten module.
- * We only load the module once and cache it in _modulePromise.
- */
-async function getLibRawModule() {
-	if (!_modulePromise) {
-		_modulePromise = LibRawModule(); // This returns a promise (MODULARIZE=1)
-	}
-	return _modulePromise;
-}
-
 export default class LibRaw {
 	constructor() {
-		// On construction, wait until the module is ready, then instantiate a new C++ LibRaw object.
-		this._ready = getLibRawModule().then((mod) => {
-			this._libraw = new mod.LibRaw();
-		});
+		this.worker = new Worker(new URL('./worker.js', import.meta.url), {type:"module"});
+		this.waitForWorker = false;
+		this.worker.onmessage = ({data}) => {
+			if(this.waitForWorker) {
+				let {"return": ret, "throw": thr} = this.waitForWorker;
+				this.waitForWorker = false;
+				if(data?.error) {
+					thr(data.error);
+				} else {
+					ret(data?.out);
+				}
+			}
+		};
 	}
-
+	
+	async runFn(fn, ...args) {
+		let prom = new Promise((res, err)=>{
+			this.waitForWorker = {
+				error: err,
+				return: res,
+			};
+		});
+		this.worker.postMessage({fn, args}, args.map(a=>{
+			if([ArrayBuffer, Uint8Array, Int8Array, Uint16Array, Int16Array, Uint32Array, Int32Array, Float32Array, Float64Array].some(b=>a instanceof b)) { // Transfer buffer
+				return a.buffer;
+			}
+		}).filter(a=>a));
+		return await prom;
+	}
 	/**
 	 * Open/parse the RAW data with optional settings
 	 */
 	async open(buffer, settings) {
-		await this._ready;
-		// Here, each JS LibRaw instance calls its own underlying C++ object
-		return this._libraw.open(buffer, settings);
+		return await this.runFn('open', buffer, settings);
 	}
 
 	/**
 	 * Retrieve metadata
 	 */
 	async metadata(fullOutput) {
-		await this._ready;
-		let metadata = this._libraw.metadata(!!fullOutput);
+		let metadata = await this.runFn('metadata', !!fullOutput);
 		// Example: convert numeric thumb_format to a string
 		if (metadata?.hasOwnProperty('thumb_format')) {
 			metadata.thumb_format = [
@@ -63,7 +68,6 @@ export default class LibRaw {
 	 * but we've already awaited the module & instance.)
 	 */
 	async imageData() {
-		await this._ready;
-		return this._libraw.imageData();
+		return await this.runFn('imageData');
 	}
 }
