@@ -898,7 +898,6 @@ public:
 		val resultObj = val::object();
 
 		// Store the basic image info
-		resultObj.set("type",   (int)out->type);   // cast to int
 		resultObj.set("height", out->height);
 		resultObj.set("width",  out->width);
 		resultObj.set("colors", out->colors);
