@@ -1,6 +1,6 @@
 {
 	"name": "libraw-wasm",
-	"version": "1.0.5",
+	"version": "1.1.0",
 	"description": "LibRaw WASM bindings to be able to use it in the browser.",
 	"main": "dist/index.js",
 	"type": "module",
@@ -8,7 +8,7 @@
 		"lib": "lib"
 	},
 	"scripts": {
-		"example": "python -m http.server",
+		"example": "python -m http.server 9000",
 		"build": "node build.js"
 	},
 	"files": [
