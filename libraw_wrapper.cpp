@@ -869,7 +869,9 @@ public:
 		if (!processor_) {
 			return val::undefined();
 		}
-		if(!isUnpacked) {
+
+		// If not yet unpacked/processed, do it now
+		if (!isUnpacked) {
 			isUnpacked = true;
 
 			int ret = processor_->unpack();
@@ -883,38 +885,73 @@ public:
 			}
 		}
 
-		libraw_processed_image_t* out = processor_->dcraw_make_mem_image();
-		// If out is NULL, we can't proceed
+		// Make a processed image in memory
+		libraw_processed_image_t* out = nullptr;
+		out = processor_->dcraw_make_mem_image();
 		if (!out) {
+			// If dcraw_make_mem_image() fails or returns null,
+			// we return undefined or throw an error
 			return val::undefined();
 		}
 
-		// If out->data is actually declared as a pointer, it should be fine;
-		// if it's an array, the compiler might complain about the pointer check.
-		// We'll omit the check to avoid the warning:
-		// if (!out->data) { ... }  // can be removed if out->data is guaranteed valid
+		// Prepare a JS object to hold all the result fields
+		val resultObj = val::object();
 
-		val resultData = val::undefined();
+		// Store the basic image info
+		resultObj.set("type",   (int)out->type);   // cast to int
+		resultObj.set("height", out->height);
+		resultObj.set("width",  out->width);
+		resultObj.set("colors", out->colors);
+		resultObj.set("bits",   out->bits);
 
+		// Calculate total pixels and total bytes
 		size_t pixelCount = static_cast<size_t>(out->height) *
 							static_cast<size_t>(out->width)  *
 							static_cast<size_t>(out->colors);
+		size_t bytesPerSample = out->bits / 8;
+		size_t totalBytes = pixelCount * bytesPerSample;
+
+		resultObj.set("dataSize", totalBytes);
+
+		// Convert C++ pointer data into a new JS TypedArray, then free LibRaw memory.
+		// We do this to avoid referencing freed memory.
+
+		val jsData = val::undefined();
 
 		if (out->bits == 8) {
-			val view = val(typed_memory_view(pixelCount, (uint8_t*)out->data));
-			resultData = view;
+			// We'll create a new Uint8Array of length totalBytes
+			// and copy the data from out->data
+			val typedArrayCtor = val::global("Uint8Array");
+			val typedArray = typedArrayCtor.new_(val((unsigned)totalBytes));  // allocate new JS array
+			// typed_memory_view(...) references the existing memory from out->data
+			val memView = val(typed_memory_view(totalBytes, (uint8_t*)out->data));
+			// Copy from memView into typedArray
+			typedArray.call<void>("set", memView);
+			jsData = typedArray;
 		}
 		else if (out->bits == 16) {
-			val view = val(typed_memory_view(pixelCount, (uint16_t*)out->data));
-			resultData = view;
+			// We'll create a new Uint16Array of length pixelCount
+			unsigned length = (unsigned)pixelCount; // # of 16-bit samples
+			val typedArrayCtor = val::global("Uint16Array");
+			val typedArray = typedArrayCtor.new_(val(length));
+			// typed_memory_view(...) references out->data as an array of uint16
+			val memView = val(typed_memory_view(length, (uint16_t*)out->data));
+			typedArray.call<void>("set", memView);
+			jsData = typedArray;
 		}
 		else {
+			// Unknown bit depth; free memory and throw
 			processor_->dcraw_clear_mem(out);
 			throw std::runtime_error("Unsupported bit depth");
 		}
 
+		// Now we can safely free the processed image data
 		processor_->dcraw_clear_mem(out);
-		return resultData;
+
+		// Put the typed array into the result object
+		resultObj.set("data", jsData);
+
+		return resultObj;
 	}
 
 private:
