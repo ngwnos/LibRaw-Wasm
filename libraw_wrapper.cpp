@@ -51,8 +51,14 @@ public:
 		// --------------------------------------------------------------------
 		// 1) Basic fields: sizes, camera info, etc.
 		// --------------------------------------------------------------------
-		meta.set("width",	   processor_->imgdata.sizes.width);
-		meta.set("height",	  processor_->imgdata.sizes.height);
+		unsigned orientedWidth  = processor_->imgdata.sizes.width;
+		unsigned orientedHeight = processor_->imgdata.sizes.height;
+		int flipCode = processor_->imgdata.sizes.flip;  // 0..7
+		if (flipCode == 5 || flipCode == 6 || flipCode == 7) {// rotations of 90/270:
+			std::swap(orientedWidth, orientedHeight);
+		}
+		meta.set("width",       orientedWidth);
+		meta.set("height",      orientedHeight);
 		meta.set("raw_width",   processor_->imgdata.sizes.raw_width);
 		meta.set("raw_height",  processor_->imgdata.sizes.raw_height);
 		meta.set("top_margin",  processor_->imgdata.sizes.top_margin);
@@ -910,7 +916,7 @@ public:
 		size_t bytesPerSample = out->bits / 8;
 		size_t totalBytes = pixelCount * bytesPerSample;
 
-		resultObj.set("dataSize", totalBytes);
+		resultObj.set("dataSize", (unsigned int)out->data_size);
 
 		// Convert C++ pointer data into a new JS TypedArray, then free LibRaw memory.
 		// We do this to avoid referencing freed memory.
