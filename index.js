@@ -52,6 +52,9 @@ export default class LibRaw {
 		if (metadata?.hasOwnProperty('desc')) {
 			metadata.desc = String(metadata.desc).trim();
 		}
+		if (metadata?.hasOwnProperty('timestamp')) {
+			metadata.timestamp = new Date(metadata.timestamp);
+		}
 		return metadata;
 	}
 
