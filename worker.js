@@ -18,6 +18,12 @@ self.onmessage = async (event) => {
   const { fn, args } = event.data;
   try {
 	await ready;
+	if (fn === 'open') {
+		if (!args[1]) args[1] = {};
+		if (args[1].userQual === undefined) {
+			args[1].userQual = 8; // DHT demosaic
+		}
+	}
     let out = raw[fn](...args);
     self.postMessage({out},  (Array.isArray(out)?out:(typeof out=='object'?Object.values(out):[])).map(a=>{
 		if([ArrayBuffer, Uint8Array, Int8Array, Uint16Array, Int16Array, Uint32Array, Int32Array, Float32Array, Float64Array].some(b=>a instanceof b)) { // Transfer buffer
