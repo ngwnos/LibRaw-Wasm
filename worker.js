@@ -21,7 +21,7 @@ self.onmessage = async (event) => {
 	if (fn === 'open') {
 		if (!args[1]) args[1] = {};
 		if (args[1].userQual === undefined) {
-			args[1].userQual = 8; // DHT demosaic
+			args[1].userQual = 11; // DHT demosaic
 		}
 	}
     let out = raw[fn](...args);
